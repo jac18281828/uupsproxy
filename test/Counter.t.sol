@@ -2,23 +2,26 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
-import "../src/Counter.sol";
+
+import {CountFly} from "../src/Counter.sol";
+import {createFly, CountProxy} from "../src/CounterProxy.sol";
 
 contract CounterTest is Test {
-    Counter public counter;
+    CountFly public count;
 
     function setUp() public {
-        counter = new Counter();
-        counter.setNumber(0);
+        count = createFly(1);
     }
 
-    function testIncrement() public {
-        counter.increment();
-        assertEq(counter.number(), 1);
+    function testGet() public {
+        assertEq(count.number(), 1);
+        assertEq(count.get(), 1);
     }
 
-    function testSetNumber(uint256 x) public {
-        counter.setNumber(x);
-        assertEq(counter.number(), x);
+    function testUpgrade() public {
+        CountProxy _proxy = CountProxy(payable(address(count)));
+        _proxy.upgrade(17);
+        assertEq(count.number(), 17);
+        assertEq(count.get(), 17);
     }
 }
